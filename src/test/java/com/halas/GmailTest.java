@@ -9,9 +9,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.TimeUnit;
-
 import static com.halas.DriverManager.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -31,7 +28,7 @@ public class GmailTest {
     }
 
     @Test
-    void testLogIn() throws InterruptedException {
+    void testLogIn() {
         //authorization block
         WebElement emailAreaElement = getWebDriver().findElement(By.id("identifierId"));
         emailAreaElement.sendKeys(USER_NAME);
@@ -42,9 +39,10 @@ public class GmailTest {
         passwordAreaElement.sendKeys(PASSWORD);
         WebElement buttonPasswordNextElement = getWebDriver().findElement(By.id("passwordNext"));
         buttonPasswordNextElement.click();
-        //sent message block
-        WebElement buttonWriteSomeoneElement = getWebDriver().findElement(By.cssSelector("[jscontroller='DUNnfe'] [role='button']"));
+        //button sendMessage and then will open form to send message
+        WebElement buttonWriteSomeoneElement = getWebDriverWait().until(ExpectedConditions.elementToBeClickable(By.cssSelector("[jscontroller='DUNnfe'] [role='button']")));
         buttonWriteSomeoneElement.click();
+        //sent message form/block
         WebElement textToWhoSendElement = getWebDriverWait().until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//textarea[@name='to']")));
         textToWhoSendElement.sendKeys(FIELD_EMAIL_TO);
         WebElement textThemeToSendElement = getWebDriver().findElement(By.name("subjectbox"));
@@ -53,23 +51,23 @@ public class GmailTest {
         justTextToSendElement.sendKeys(FIELD_JUST_TEXT);
         WebElement buttonSendMessageElement = getWebDriverWait().until(ExpectedConditions.elementToBeClickable(By.cssSelector("div[role='button'][data-tooltip*='(Ctrl –Enter)']")));
         buttonSendMessageElement.click();
+        //current time in HH:mm
         String currentTime = new MyDate().getCurrentTimeHoursMinutes();
-
         //will found element sent and assert that message was sent
         WebElement sentMessagesElement = getWebDriverWait().until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href$='sent']")));
         sentMessagesElement.click();
         //two waiter for load all first element on new page AND load textThatSent
         getWebDriverWait()
-                .until(ExpectedConditions.not(ExpectedConditions.attributeToBe(By.cssSelector("div[role='main'] tbody > tr:first-child > td:nth-child(5) > div:nth-child(2) > span[email][name]"), "email", USER_NAME)));
+                .until(ExpectedConditions.not(ExpectedConditions.attributeToBe(By.cssSelector(
+                        "div[role='main'] tbody > tr:first-child > td:nth-child(5) > div:nth-child(2) > span[email][name]"), "email", USER_NAME)));
         getWebDriverWait()
-                .until(ExpectedConditions.not(ExpectedConditions.textToBe(By.cssSelector("div[role=\"main\"] tbody > tr:first-child > *[tabindex] > div > div > span"), " ")));
-
+                .until(ExpectedConditions.not(ExpectedConditions.textToBe(By.cssSelector(
+                        "div[role=\"main\"] tbody > tr:first-child > *[tabindex] > div > div > span"), " ")));
         WebElement onTopFirstMessageSentElement = getWebDriver().findElement((By.cssSelector("div.AO div[role='main'] tbody>tr:first-child>*[tabindex]")));
         String textExpected = onTopFirstMessageSentElement.getText();
         LOG.info("First message: " + textExpected);
         assertTrue(textExpected.startsWith(FIELD_THEME));
         assertTrue(textExpected.endsWith(FIELD_JUST_TEXT));
-
         WebElement timeMessageSentElement = getWebDriver().findElement(By.cssSelector("div.AO div[role='main'] tbody>tr:first-child>td:nth-last-child(2)>*"));
         LOG.info("Time message: " + timeMessageSentElement.getAttribute("title"));
         String actualTime = timeMessageSentElement.getText();
@@ -80,5 +78,4 @@ public class GmailTest {
     void closeObjects() {
         getWebDriver().quit();
     }
-
 }

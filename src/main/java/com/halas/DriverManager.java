@@ -23,7 +23,6 @@ public class DriverManager {
             driver = new ChromeDriver();
             driver.manage().timeouts()
                     .implicitlyWait(20, TimeUnit.SECONDS);
-            //driver.get(HOME_PAGE);
             driver.manage().window().maximize();
         }
         return driver;
