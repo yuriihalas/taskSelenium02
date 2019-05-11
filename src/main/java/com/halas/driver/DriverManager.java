@@ -30,11 +30,10 @@ public class DriverManager {
 
     public static WebDriverWait getWebDriverWait() {
         if (Objects.isNull(driverWait)) {
-            if (Objects.nonNull(driver)) {
-                driverWait = new WebDriverWait(driver, 50);
-            } else {
+            if (Objects.isNull(driver)) {
                 getWebDriver();
             }
+            driverWait = new WebDriverWait(driver, 50);
         }
         return driverWait;
     }
