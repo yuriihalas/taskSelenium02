@@ -1,5 +1,7 @@
 package com.halas;
 
+import com.halas.date.MyDate;
+import com.halas.utils.RandomSentence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -9,7 +11,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static com.halas.DriverManager.*;
+import static com.halas.driver.DriverManager.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -20,7 +22,6 @@ public class GmailTest {
     private static final String PASSWORD = "423489123789op";
     private static final String FIELD_EMAIL_TO = "groot.epam@gmail.com";
     private static final String FIELD_THEME = "Final battle";
-    private static final String FIELD_JUST_TEXT = "Hello, I am a robot!";
 
     @BeforeClass
     void initObjects() {
@@ -29,6 +30,8 @@ public class GmailTest {
 
     @Test
     void testLogIn() {
+        //for check is difference between minutes in time is <= 1
+        MyDate myDate = new MyDate();
         //authorization block
         WebElement emailAreaElement = getWebDriver().findElement(By.id("identifierId"));
         emailAreaElement.sendKeys(USER_NAME);
@@ -39,6 +42,7 @@ public class GmailTest {
         passwordAreaElement.sendKeys(PASSWORD);
         WebElement buttonPasswordNextElement = getWebDriver().findElement(By.id("passwordNext"));
         buttonPasswordNextElement.click();
+        String justTextToSendUser = RandomSentence.getSentence();
         //button sendMessage and then will open form to send message
         WebElement buttonWriteSomeoneElement = getWebDriverWait().until(ExpectedConditions.elementToBeClickable(By.cssSelector("[jscontroller='DUNnfe'] [role='button']")));
         buttonWriteSomeoneElement.click();
@@ -48,11 +52,11 @@ public class GmailTest {
         WebElement textThemeToSendElement = getWebDriver().findElement(By.name("subjectbox"));
         textThemeToSendElement.sendKeys(FIELD_THEME);
         WebElement justTextToSendElement = getWebDriver().findElement(By.xpath("//div[@role='textbox']"));
-        justTextToSendElement.sendKeys(FIELD_JUST_TEXT);
+        justTextToSendElement.sendKeys(justTextToSendUser);
         WebElement buttonSendMessageElement = getWebDriverWait().until(ExpectedConditions.elementToBeClickable(By.cssSelector("div[role='button'][data-tooltip*='(Ctrl –Enter)']")));
         buttonSendMessageElement.click();
         //current time in HH:mm
-        String currentTime = new MyDate().getCurrentTimeHoursMinutes();
+        String currentTime = myDate.getCurrentTimeHoursMinutes();
         //will found element sent and assert that message was sent
         WebElement sentMessagesElement = getWebDriverWait().until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href$='sent']")));
         sentMessagesElement.click();
@@ -67,11 +71,11 @@ public class GmailTest {
         String textExpected = onTopFirstMessageSentElement.getText();
         LOG.info("First message: " + textExpected);
         assertTrue(textExpected.startsWith(FIELD_THEME));
-        assertTrue(textExpected.endsWith(FIELD_JUST_TEXT));
+        assertTrue(textExpected.endsWith(justTextToSendUser));
         WebElement timeMessageSentElement = getWebDriver().findElement(By.cssSelector("div.AO div[role='main'] tbody>tr:first-child>td:nth-last-child(2)>*"));
         LOG.info("Time message: " + timeMessageSentElement.getAttribute("title"));
         String actualTime = timeMessageSentElement.getText();
-        assertEquals(currentTime, actualTime);
+        assertTrue(myDate.isOnePlusOrOneLessMinutes(currentTime, actualTime));
     }
 
     @AfterClass

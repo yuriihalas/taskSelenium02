@@ -1,4 +1,4 @@
-package com.halas;
+package com.halas.driver;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -22,7 +22,7 @@ public class DriverManager {
             System.setProperty(WEB_DRIVER_NAME, PATH_TO_DRIVER);
             driver = new ChromeDriver();
             driver.manage().timeouts()
-                    .implicitlyWait(20, TimeUnit.SECONDS);
+                    .implicitlyWait(30, TimeUnit.SECONDS);
             driver.manage().window().maximize();
         }
         return driver;
@@ -31,7 +31,7 @@ public class DriverManager {
     public static WebDriverWait getWebDriverWait() {
         if (Objects.isNull(driverWait)) {
             if (Objects.nonNull(driver)) {
-                driverWait = new WebDriverWait(driver, 30);
+                driverWait = new WebDriverWait(driver, 50);
             } else {
                 getWebDriver();
             }
